@@ -28,6 +28,10 @@
           "type": "string",
           "description": "The phone number of the user."
         },
+        "isAdmin": {
+          "type": "boolean",
+          "description": "Whether the user has admin privileges."
+        },
         "createdAt": {
           "type": "string",
           "description": "The timestamp when the user was created.",

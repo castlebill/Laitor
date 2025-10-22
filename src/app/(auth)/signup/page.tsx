@@ -48,6 +48,7 @@ export default function SignUpPage() {
         firstName,
         lastName,
         email: user.email,
+        isAdmin: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
