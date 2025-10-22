@@ -1,206 +1,113 @@
 {
   "entities": {
-    "User": {
+    "Broker": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "User",
+      "title": "Broker",
       "type": "object",
-      "description": "Represents a user of the OneStop Agent application.",
+      "description": "Represents an insurance brokerage or agency, acting as a tenant in the system.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the user.",
-          "format": "uuid"
-        },
-        "firstName": {
-          "type": "string",
-          "description": "The first name of the user."
-        },
-        "lastName": {
-          "type": "string",
-          "description": "The last name of the user."
-        },
-        "email": {
-          "type": "string",
-          "description": "The email address of the user.",
-          "format": "email"
-        },
-        "phone": {
-          "type": "string",
-          "description": "The phone number of the user."
-        },
-        "isAdmin": {
-          "type": "boolean",
-          "description": "Whether the user has admin privileges."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "The timestamp when the user was created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "The timestamp when the user was last updated.",
-          "format": "date-time"
-        }
+        "id": { "type": "string", "description": "Unique identifier for the broker." },
+        "name": { "type": "string", "description": "The name of the brokerage." },
+        "address": { "type": "string", "description": "The physical address of the brokerage." },
+        "contactEmail": { "type": "string", "format": "email", "description": "Primary contact email for the brokerage." },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": [
-        "id",
-        "email"
-      ]
+      "required": ["id", "name", "contactEmail"]
+    },
+    "InsuranceCompany": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "InsuranceCompany",
+      "type": "object",
+      "description": "Represents an insurance company that provides plans.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the insurance company." },
+        "name": { "type": "string", "description": "The name of the insurance company." }
+      },
+      "required": ["id", "name"]
+    },
+    "Agent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Agent",
+      "type": "object",
+      "description": "Represents an agent user who works for a broker.",
+      "properties": {
+        "id": { "type": "string", "description": "Corresponds to the Firebase Auth user ID." },
+        "brokerId": { "type": "string", "description": "The ID of the broker this agent belongs to." },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "isAdmin": { "type": "boolean", "description": "Whether the agent has admin rights within their brokerage." },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "brokerId", "email"]
+    },
+    "Customer": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Customer",
+      "type": "object",
+      "description": "Represents an end-user customer who purchases insurance.",
+      "properties": {
+        "id": { "type": "string", "description": "Corresponds to the Firebase Auth user ID." },
+        "brokerId": { "type": "string", "description": "The ID of the broker managing this customer." },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "brokerId", "email"]
     },
     "Plan": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Plan",
       "type": "object",
-      "description": "Represents an insurance plan.",
+      "description": "Represents an insurance plan offered by an insurance company.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the plan."
-        },
-        "provider": {
-          "type": "string",
-          "description": "The insurance provider."
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the plan."
-        },
-        "price": {
-          "type": "number",
-          "description": "The price of the plan."
-        },
-        "coverage": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "List of coverages offered by the plan."
-        },
-        "type": {
-          "type": "string",
-          "description": "The type of insurance (e.g., motor, health, property, life)."
-        },
-        "deductible": {
-          "type": "number",
-          "description": "The deductible amount for the plan."
-        }
+        "id": { "type": "string" },
+        "companyId": { "type": "string", "description": "Reference to InsuranceCompany." },
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "coverage": { "type": "array", "items": { "type": "string" } },
+        "type": { "type": "string", "enum": ["motor", "health", "property", "life"] },
+        "deductible": { "type": "number" }
       },
-      "required": [
-        "id",
-        "provider",
-        "name",
-        "price",
-        "type"
-      ]
+      "required": ["id", "companyId", "name", "price", "type"]
     },
     "Policy": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Policy",
       "type": "object",
-      "description": "Represents an insurance policy.",
+      "description": "Represents an insurance policy held by a customer.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the policy."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Policy)"
-        },
-        "planId": {
-          "type": "string",
-          "description": "Reference to Plan."
-        },
-        "provider": {
-          "type": "string",
-          "description": "The insurance provider."
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the plan."
-        },
-        "policyNumber": {
-          "type": "string",
-          "description": "The policy number."
-        },
-        "startDate": {
-          "type": "string",
-          "description": "The start date of the policy.",
-          "format": "date-time"
-        },
-        "endDate": {
-          "type": "string",
-          "description": "The end date of the policy.",
-          "format": "date-time"
-        },
-        "status": {
-          "type": "string",
-          "enum": ["Active", "Expired", "Pending"]
-        }
+        "id": { "type": "string" },
+        "customerId": { "type": "string" },
+        "planId": { "type": "string" },
+        "policyNumber": { "type": "string" },
+        "startDate": { "type": "string", "format": "date-time" },
+        "endDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["Active", "Expired", "Pending"] }
       },
-      "required": [
-        "id",
-        "userId",
-        "planId",
-        "policyNumber",
-        "provider",
-        "name",
-        "startDate",
-        "endDate",
-        "status"
-      ]
+      "required": ["id", "customerId", "planId", "policyNumber", "startDate", "endDate", "status"]
     },
     "Claim": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Claim",
       "type": "object",
-      "description": "Represents an insurance claim.",
+      "description": "Represents an insurance claim on a policy.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the claim."
-        },
-        "policyId": {
-          "type": "string",
-          "description": "Reference to Policy. (Relationship: Policy 1:N Claim)"
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User."
-        },
-        "claimNumber": {
-          "type": "string",
-          "description": "The claim number."
-        },
-        "dateFiled": {
-          "type": "string",
-          "description": "The date the claim was filed.",
-          "format": "date-time"
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of the claim."
-        },
-        "status": {
-          "type": "string",
-          "description": "The status of the claim (e.g., open, pending, approved, denied)."
-        },
-        "amount": {
-          "type": "number",
-          "description": "The amount claimed."
-        }
+        "id": { "type": "string" },
+        "policyId": { "type": "string" },
+        "customerId": { "type": "string" },
+        "claimNumber": { "type": "string" },
+        "dateFiled": { "type": "string", "format": "date-time" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["Processing", "Approved", "Rejected", "Pending"] },
+        "amount": { "type": "number" }
       },
-      "required": [
-        "id",
-        "policyId",
-        "userId",
-        "claimNumber",
-        "dateFiled",
-        "description",
-        "status",
-        "amount"
-      ]
+      "required": ["id", "policyId", "customerId", "claimNumber", "dateFiled", "description", "status", "amount"]
     }
   },
   "auth": {
@@ -212,43 +119,52 @@
   "firestore": {
     "structure": [
       {
-        "path": "/users/{userId}",
+        "path": "/brokers/{brokerId}",
         "definition": {
-          "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profiles. Each document is keyed by the user's unique ID."
+          "entityName": "Broker",
+          "schema": { "$ref": "#/backend/entities/Broker" }
+        }
+      },
+      {
+        "path": "/insuranceCompanies/{companyId}",
+        "definition": {
+          "entityName": "InsuranceCompany",
+          "schema": { "$ref": "#/backend/entities/InsuranceCompany" }
+        }
+      },
+      {
+        "path": "/brokers/{brokerId}/agents/{agentId}",
+        "definition": {
+          "entityName": "Agent",
+          "schema": { "$ref": "#/backend/entities/Agent" }
+        }
+      },
+      {
+        "path": "/brokers/{brokerId}/customers/{customerId}",
+        "definition": {
+          "entityName": "Customer",
+          "schema": { "$ref": "#/backend/entities/Customer" }
         }
       },
       {
         "path": "/plans/{planId}",
         "definition": {
           "entityName": "Plan",
-          "schema": {
-            "$ref": "#/backend/entities/Plan"
-          },
-          "description": "Stores all available insurance plans."
+          "schema": { "$ref": "#/backend/entities/Plan" }
         }
       },
       {
-        "path": "/users/{userId}/policies/{policyId}",
+        "path": "/brokers/{brokerId}/customers/{customerId}/policies/{policyId}",
         "definition": {
           "entityName": "Policy",
-          "schema": {
-            "$ref": "#/backend/entities/Policy"
-          },
-          "description": "Stores insurance policies for each user. The userId is included in the path for ownership and security."
+          "schema": { "$ref": "#/backend/entities/Policy" }
         }
       },
       {
-        "path": "/users/{userId}/policies/{policyId}/claims/{claimId}",
+        "path": "/brokers/{brokerId}/customers/{customerId}/policies/{policyId}/claims/{claimId}",
         "definition": {
           "entityName": "Claim",
-          "schema": {
-            "$ref": "#/backend/entities/Claim"
-          },
-          "description": "Stores insurance claims for each policy. Nested within the policy for data locality and easy access."
+          "schema": { "$ref": "#/backend/entities/Claim" }
         }
       }
     ]
