@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "motor-insurance",
+      "description": "A modern car on a scenic road.",
+      "imageUrl": "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjYXIlMjByb2FkfGVufDB8fHx8MTc2MTEwODU3N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "car road"
+    },
+    {
+      "id": "health-insurance",
+      "description": "A stethoscope on a clean surface.",
+      "imageUrl": "https://images.unsplash.com/photo-1564732005956-20420ebdab60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxoZWFsdGglMjBtZWRpY2FsfGVufDB8fHx8MTc2MTA0Mzc3MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "health medical"
+    },
+    {
+      "id": "property-insurance",
+      "description": "A beautiful modern house.",
+      "imageUrl": "https://images.unsplash.com/photo-1628012209120-d9db7abf7eab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxob3VzZSUyMG1vZGVybnxlbnwwfHx8fDE3NjExNTA1MzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "house modern"
+    },
+    {
+      "id": "life-insurance",
+      "description": "A family enjoying a sunny day.",
+      "imageUrl": "https://images.unsplash.com/photo-1440288736878-766bd5839edb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxmYW1pbHklMjBwYXJrfGVufDB8fHx8MTc2MTA5NjcwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "family park"
+    },
+    {
+      "id": "user-avatar",
+      "description": "A friendly user avatar.",
+      "imageUrl": "https://images.unsplash.com/photo-1590086782792-42dd2350140d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjExMjcwNDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    }
+  ]
 }
