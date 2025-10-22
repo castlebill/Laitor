@@ -1,0 +1,261 @@
+/**
+ * @file Firestore Security Rules for OneStop Agent Application
+ *
+ * @core_philosophy This ruleset enforces a strict user-ownership model,
+ * ensuring that only the authenticated user or authorized roles can access
+ * and modify data related to their profiles, policies, claims, payments, and
+ * recommendations. All data is nested under /users/{userId}, and access
+ * control is primarily based on matching the authenticated user's UID with the
+ * userId path parameter.
+ *
+ * @data_structure
+ * - /users/{userId}: Stores user profiles.
+ * - /users/{userId}/policies/{policyId}: Stores insurance policies for each user.
+ * - /users/{userId}/policies/{policyId}/claims/{claimId}: Stores insurance claims for each policy.
+ * - /users/{userId}/policies/{policyId}/payments/{paymentId}: Stores payments made for each policy.
+ * - /users/{userId}/recommendations/{recommendationId}: Stores policy recommendations for each user.
+ *
+ * @key_security_decisions
+ * - User listing is explicitly denied to prevent unauthorized access to user data.
+ * - Data validation is relaxed in this prototyping phase, but ownership is strictly enforced.
+ * - All write operations are protected by authorization checks to ensure data integrity.
+ *
+ * @denormalization_for_authorization
+ *   The `userId` is embedded in the path for all user-owned data, removing the
+ *   need for `get()` calls to verify ownership. This simplifies the rules and
+ *   improves performance.
+ *
+ * @structural_segregation
+ *   All private user data is stored under the /users/{userId} path, ensuring
+ *   that it is isolated and protected from unauthorized access.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Controls access to user profiles.
+     * @path /users/{userId}
+     * @allow (create) Authenticated user can create their own profile.
+     * @allow (get) Authenticated user can read their own profile.
+     * @allow (update) Authenticated user can update their own profile.
+     * @allow (delete) Authenticated user can delete their own profile.
+     * @deny (list) Listing all users is prohibited.
+     * @deny (create) Unauthenticated users cannot create profiles.
+     * @deny (update) Users cannot update profiles they don't own.
+     * @deny (delete) Users cannot delete profiles they don't own.
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId} {
+      // Helper function to check if the user is signed in
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      // Helper function to check if the user is the owner of the document
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      // Helper function to check if the user is the existing owner of the document
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      // Allow a user to create their own profile
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == request.auth.uid;
+
+      // Allow a user to get their own profile
+      allow get: if isSignedIn() && isOwner(userId);
+
+      // Allow a user to update their own profile
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+
+      // Allow a user to delete their own profile
+      allow delete: if isExistingOwner(userId);
+
+      // Prevent listing all users
+      allow list: if false;
+    }
+
+    /**
+     * @description Controls access to insurance policies for each user.
+     * @path /users/{userId}/policies/{policyId}
+     * @allow (create) Authenticated user can create policies under their profile.
+     * @allow (get) Authenticated user can read policies under their profile.
+     * @allow (update) Authenticated user can update policies under their profile.
+     * @allow (delete) Authenticated user can delete policies under their profile.
+     * @allow (list) Authenticated user can list policies under their profile.
+     * @deny (create) Users cannot create policies under profiles they don't own.
+     * @deny (update) Users cannot update policies they don't own.
+     * @deny (delete) Users cannot delete policies they don't own.
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId}/policies/{policyId} {
+      // Helper function to check if the user is signed in
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      // Helper function to check if the user is the owner of the document
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      // Helper function to check if the user is the existing owner of the document
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      // Allow a user to create a policy under their profile
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+
+      // Allow a user to get a policy under their profile
+      allow get: if isSignedIn() && isOwner(userId);
+
+      // Allow a user to update a policy under their profile
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == userId;
+
+      // Allow a user to delete a policy under their profile
+      allow delete: if isExistingOwner(userId);
+
+      // Allow a user to list policies under their profile
+      allow list: if isSignedIn() && isOwner(userId);
+    }
+
+    /**
+     * @description Controls access to insurance claims for each policy.
+     * @path /users/{userId}/policies/{policyId}/claims/{claimId}
+     * @allow (create) Authenticated user can create claims under their policies.
+     * @allow (get) Authenticated user can read claims under their policies.
+     * @allow (update) Authenticated user can update claims under their policies.
+     * @allow (delete) Authenticated user can delete claims under their policies.
+     * @allow (list) Authenticated user can list claims under their policies.
+     * @deny (create) Users cannot create claims under policies they don't own.
+     * @deny (update) Users cannot update claims they don't own.
+     * @deny (delete) Users cannot delete claims they don't own.
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId}/policies/{policyId}/claims/{claimId} {
+      // Helper function to check if the user is signed in
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      // Helper function to check if the user is the owner of the document
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      // Helper function to check if the user is the existing owner of the document
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      // Allow a user to create a claim under their policy
+      allow create: if isSignedIn() && isOwner(userId);
+
+      // Allow a user to get a claim under their policy
+      allow get: if isSignedIn() && isOwner(userId);
+
+      // Allow a user to update a claim under their policy
+      allow update: if isExistingOwner(userId);
+
+      // Allow a user to delete a claim under their policy
+      allow delete: if isExistingOwner(userId);
+
+      // Allow a user to list claims under their policy
+      allow list: if isSignedIn() && isOwner(userId);
+    }
+
+    /**
+     * @description Controls access to payments made for each policy.
+     * @path /users/{userId}/policies/{policyId}/payments/{paymentId}
+     * @allow (create) Authenticated user can create payments under their policies.
+     * @allow (get) Authenticated user can read payments under their policies.
+     * @allow (update) Authenticated user can update payments under their policies.
+     * @allow (delete) Authenticated user can delete payments under their policies.
+     * @allow (list) Authenticated user can list payments under their policies.
+     * @deny (create) Users cannot create payments under policies they don't own.
+     * @deny (update) Users cannot update payments they don't own.
+     * @deny (delete) Users cannot delete payments they don't own.
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId}/policies/{policyId}/payments/{paymentId} {
+      // Helper function to check if the user is signed in
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      // Helper function to check if the user is the owner of the document
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      // Helper function to check if the user is the existing owner of the document
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      // Allow a user to create a payment under their policy
+      allow create: if isSignedIn() && isOwner(userId);
+
+      // Allow a user to get a payment under their policy
+      allow get: if isSignedIn() && isOwner(userId);
+
+      // Allow a user to update a payment under their policy
+      allow update: if isExistingOwner(userId);
+
+      // Allow a user to delete a payment under their policy
+      allow delete: if isExistingOwner(userId);
+
+      // Allow a user to list payments under their policy
+      allow list: if isSignedIn() && isOwner(userId);
+    }
+
+    /**
+     * @description Controls access to policy recommendations for each user.
+     * @path /users/{userId}/recommendations/{recommendationId}
+     * @allow (create) Authenticated user can create recommendations under their profile.
+     * @allow (get) Authenticated user can read recommendations under their profile.
+     * @allow (update) Authenticated user can update recommendations under their profile.
+     * @allow (delete) Authenticated user can delete recommendations under their profile.
+     * @allow (list) Authenticated user can list recommendations under their profile.
+     * @deny (create) Users cannot create recommendations under profiles they don't own.
+     * @deny (update) Users cannot update recommendations they don't own.
+     * @deny (delete) Users cannot delete recommendations they don't own.
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId}/recommendations/{recommendationId} {
+      // Helper function to check if the user is signed in
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      // Helper function to check if the user is the owner of the document
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      // Helper function to check if the user is the existing owner of the document
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      // Allow a user to create a recommendation under their profile
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+
+      // Allow a user to get a recommendation under their profile
+      allow get: if isSignedIn() && isOwner(userId);
+
+      // Allow a user to update a recommendation under their profile
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == userId;
+
+      // Allow a user to delete a recommendation under their profile
+      allow delete: if isExistingOwner(userId);
+
+      // Allow a user to list recommendations under their profile
+      allow list: if isSignedIn() && isOwner(userId);
+    }
+  }
+}
