@@ -41,12 +41,53 @@
       },
       "required": [
         "id",
-        "firstName",
-        "lastName",
-        "email",
-        "phone",
-        "createdAt",
-        "updatedAt"
+        "email"
+      ]
+    },
+    "Plan": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Plan",
+      "type": "object",
+      "description": "Represents an insurance plan.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the plan."
+        },
+        "provider": {
+          "type": "string",
+          "description": "The insurance provider."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the plan."
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the plan."
+        },
+        "coverage": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of coverages offered by the plan."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of insurance (e.g., motor, health, property, life)."
+        },
+        "deductible": {
+          "type": "number",
+          "description": "The deductible amount for the plan."
+        }
+      },
+      "required": [
+        "id",
+        "provider",
+        "name",
+        "price",
+        "type"
       ]
     },
     "Policy": {
@@ -63,17 +104,21 @@
           "type": "string",
           "description": "Reference to User. (Relationship: User 1:N Policy)"
         },
-        "policyNumber": {
+        "planId": {
           "type": "string",
-          "description": "The policy number."
-        },
-        "insuranceType": {
-          "type": "string",
-          "description": "The type of insurance (e.g., motor, health, property, life)."
+          "description": "Reference to Plan."
         },
         "provider": {
           "type": "string",
           "description": "The insurance provider."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the plan."
+        },
+        "policyNumber": {
+          "type": "string",
+          "description": "The policy number."
         },
         "startDate": {
           "type": "string",
@@ -85,32 +130,21 @@
           "description": "The end date of the policy.",
           "format": "date-time"
         },
-        "premium": {
-          "type": "number",
-          "description": "The policy premium amount."
-        },
-        "createdAt": {
+        "status": {
           "type": "string",
-          "description": "The timestamp when the policy was created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "The timestamp when the policy was last updated.",
-          "format": "date-time"
+          "enum": ["Active", "Expired", "Pending"]
         }
       },
       "required": [
         "id",
         "userId",
+        "planId",
         "policyNumber",
-        "insuranceType",
         "provider",
+        "name",
         "startDate",
         "endDate",
-        "premium",
-        "createdAt",
-        "updatedAt"
+        "status"
       ]
     },
     "Claim": {
@@ -126,6 +160,10 @@
         "policyId": {
           "type": "string",
           "description": "Reference to Policy. (Relationship: Policy 1:N Claim)"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User."
         },
         "claimNumber": {
           "type": "string",
@@ -147,128 +185,17 @@
         "amount": {
           "type": "number",
           "description": "The amount claimed."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "The timestamp when the claim was created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "The timestamp when the claim was last updated.",
-          "format": "date-time"
         }
       },
       "required": [
         "id",
         "policyId",
+        "userId",
         "claimNumber",
         "dateFiled",
         "description",
         "status",
-        "amount",
-        "createdAt",
-        "updatedAt"
-      ]
-    },
-    "Payment": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Payment",
-      "type": "object",
-      "description": "Represents a payment made for a policy.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the payment."
-        },
-        "policyId": {
-          "type": "string",
-          "description": "Reference to Policy. (Relationship: Policy 1:N Payment)"
-        },
-        "paymentDate": {
-          "type": "string",
-          "description": "The date of the payment.",
-          "format": "date-time"
-        },
-        "amount": {
-          "type": "number",
-          "description": "The amount paid."
-        },
-        "paymentMethod": {
-          "type": "string",
-          "description": "The method of payment (e.g., M-Pesa)."
-        },
-        "transactionId": {
-          "type": "string",
-          "description": "The transaction identifier."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "The timestamp when the payment was created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "The timestamp when the payment was last updated.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "policyId",
-        "paymentDate",
-        "amount",
-        "paymentMethod",
-        "transactionId",
-        "createdAt",
-        "updatedAt"
-      ]
-    },
-    "Recommendation": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Recommendation",
-      "type": "object",
-      "description": "Represents a policy recommendation generated by the system.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the recommendation."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Recommendation)"
-        },
-        "policyId": {
-          "type": "string",
-          "description": "Reference to Policy. (Relationship: Policy 1:N Recommendation)"
-        },
-        "rank": {
-          "type": "number",
-          "description": "The rank of the recommendation."
-        },
-        "reason": {
-          "type": "string",
-          "description": "The reason for the recommendation."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "The timestamp when the recommendation was created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "The timestamp when the recommendation was last updated.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "policyId",
-        "rank",
-        "reason",
-        "createdAt",
-        "updatedAt"
+        "amount"
       ]
     }
   },
@@ -287,13 +214,17 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profiles. Each document is keyed by the user's unique ID.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            }
-          ]
+          "description": "Stores user profiles. Each document is keyed by the user's unique ID."
+        }
+      },
+      {
+        "path": "/plans/{planId}",
+        "definition": {
+          "entityName": "Plan",
+          "schema": {
+            "$ref": "#/backend/entities/Plan"
+          },
+          "description": "Stores all available insurance plans."
         }
       },
       {
@@ -303,17 +234,7 @@
           "schema": {
             "$ref": "#/backend/entities/Policy"
           },
-          "description": "Stores insurance policies for each user. The userId is included in the path for ownership and security.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "policyId",
-              "description": "The unique identifier of the policy."
-            }
-          ]
+          "description": "Stores insurance policies for each user. The userId is included in the path for ownership and security."
         }
       },
       {
@@ -323,68 +244,9 @@
           "schema": {
             "$ref": "#/backend/entities/Claim"
           },
-          "description": "Stores insurance claims for each policy. Nested within the policy for data locality and easy access.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "policyId",
-              "description": "The unique identifier of the policy."
-            },
-            {
-              "name": "claimId",
-              "description": "The unique identifier of the claim."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/policies/{policyId}/payments/{paymentId}",
-        "definition": {
-          "entityName": "Payment",
-          "schema": {
-            "$ref": "#/backend/entities/Payment"
-          },
-          "description": "Stores payments made for each policy. Nested under policy for easy retrieval and management.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "policyId",
-              "description": "The unique identifier of the policy."
-            },
-            {
-              "name": "paymentId",
-              "description": "The unique identifier of the payment."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/recommendations/{recommendationId}",
-        "definition": {
-          "entityName": "Recommendation",
-          "schema": {
-            "$ref": "#/backend/entities/Recommendation"
-          },
-          "description": "Stores policy recommendations for each user.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "recommendationId",
-              "description": "The unique identifier of the recommendation."
-            }
-          ]
+          "description": "Stores insurance claims for each policy. Nested within the policy for data locality and easy access."
         }
       }
-    ],
-    "reasoning": "The Firestore data structure is designed to support the OneStop Agent application, focusing on insurance policy management, recommendations, claims, and payments. The structure prioritizes authorization independence and query performance, enabling robust security rules and efficient data retrieval.  Authorization independence is achieved by utilizing path-based ownership for user-related data and avoiding `get()` calls in rules. This means data relevant to authorization is directly accessible within the document or derived from the document's path. \n\nSpecifically:\n\n*   **Users**: User profiles are stored in the `/users/{userId}` collection, ensuring that each user's data is isolated and accessible only to themselves or authorized administrators. The `userId` is explicitly present in the path, facilitating easy access control.\n*   **Policies**: Policies are stored within user documents at `/users/{userId}/policies/{policyId}`, establishing a clear ownership hierarchy and enabling efficient queries for a user's policies. The `policyId` provides a unique identifier for each policy, and the inclusion of `userId` in the path allows for direct association with the owning user.\n*   **Claims & Payments**: Claims and Payments are stored as subcollections nested inside the `/users/{userId}/policies/{policyId}` document, this keeps the data locally available for the user. \n*   **Recommendations**: Policy Recommendations are stored within user documents at `/users/{userId}/recommendations/{recommendationId}`, establishing a clear ownership hierarchy and enabling efficient queries for a user's recommendations. The `recommendationId` provides a unique identifier for each recommendation, and the inclusion of `userId` in the path allows for direct association with the owning user.\n\nThis structure also facilitates the required QAPs (Rules are not Filters). Since private user data is segregated, listing operations are efficiently secured using path-based rules.  All rules will be simple assertions based on `request.auth.uid` and the document path."
+    ]
   }
 }

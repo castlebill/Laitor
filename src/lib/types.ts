@@ -12,18 +12,22 @@ export interface Plan {
 
 export interface Policy {
   id: string;
-  plan: Plan;
+  userId: string;
+  planId: string;
   policyNumber: string;
   startDate: string;
   endDate: string;
   status: 'Active' | 'Expired' | 'Pending';
+  plan: Plan;
 }
 
 export interface Claim {
   id: string;
-  policy: Policy;
+  policyId: string;
+  userId: string;
   claimNumber: string;
-  date: string;
-  status: 'Processing' | 'Approved' | 'Rejected' | 'Pending';
+  dateFiled: string;
   description: string;
+  status: 'Processing' | 'Approved' | 'Rejected' | 'Pending';
+  amount: number;
 }

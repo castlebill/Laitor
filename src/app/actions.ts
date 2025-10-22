@@ -2,7 +2,11 @@
 
 import { insuranceIntentUnderstanding } from '@/ai/flows/insurance-intent-understanding';
 import { generatePersonalizedRecommendations } from '@/ai/flows/personalized-insurance-recommendations';
-import { allPlans } from '@/lib/data';
+import { Plan } from '@/lib/types';
+import { collection, getDocs, getFirestore } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
+import { firebaseConfig } from '@/firebase/config';
+import { getSdks } from '@/firebase';
 import { z } from 'zod';
 
 const insuranceQuerySchema = z.object({
@@ -40,6 +44,15 @@ const recommendationSchema = z.object({
   userDetails: z.string().min(10, "Please provide more details about your needs."),
 });
 
+async function getPlans(insuranceType: string): Promise<Plan[]> {
+    const { firestore } = getSdks(initializeApp(firebaseConfig));
+    const plansCollection = collection(firestore, 'plans');
+    const plansSnapshot = await getDocs(plansCollection);
+    const allPlans: Plan[] = [];
+    plansSnapshot.forEach(doc => allPlans.push({ id: doc.id, ...doc.data() } as Plan));
+    return allPlans.filter(plan => plan.type === insuranceType);
+}
+
 export async function getRecommendations(prevState: any, formData: FormData) {
   const validatedFields = recommendationSchema.safeParse({
     insuranceType: formData.get('insuranceType'),
@@ -54,7 +67,7 @@ export async function getRecommendations(prevState: any, formData: FormData) {
   }
 
   const { insuranceType, userDetails } = validatedFields.data;
-  const availablePlans = allPlans[insuranceType];
+  const availablePlans = await getPlans(insuranceType);
   
   if (!availablePlans || availablePlans.length === 0) {
     return { message: `No plans available for ${insuranceType}.` };

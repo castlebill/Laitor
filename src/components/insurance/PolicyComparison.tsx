@@ -4,11 +4,23 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { allPlans } from '@/lib/data';
 import type { Plan } from '@/lib/types';
 import { Button } from '../ui/button';
+import { useCollection, useFirebase, useMemoFirebase } from '@/firebase';
+import { collection, query } from 'firebase/firestore';
+import { Skeleton } from '../ui/skeleton';
 
-function PlanTable({ plans }: { plans: Plan[] }) {
+function PlanTable({ plans, isLoading }: { plans: Plan[] | null, isLoading: boolean }) {
+  if (isLoading) {
+    return (
+      <div className="space-y-2 p-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    );
+  }
+
   if (!plans || plans.length === 0) {
     return <p className="text-muted-foreground p-4">No plans available for this category.</p>;
   }
@@ -42,7 +54,19 @@ function PlanTable({ plans }: { plans: Plan[] }) {
 }
 
 export function PolicyComparison() {
-  const insuranceTypes = Object.keys(allPlans);
+  const { firestore } = useFirebase();
+  const insuranceTypes = ['motor', 'health', 'property', 'life'];
+
+  const plansQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'plans'));
+  }, [firestore]);
+
+  const { data: allPlans, isLoading } = useCollection<Plan>(plansQuery);
+
+  const plansByType = (type: string) => {
+    return allPlans?.filter(plan => plan.type === type) || [];
+  }
 
   return (
     <Card>
@@ -60,7 +84,7 @@ export function PolicyComparison() {
           {insuranceTypes.map(type => (
             <TabsContent key={type} value={type}>
               <div className="rounded-md border mt-4">
-                <PlanTable plans={allPlans[type]} />
+                <PlanTable plans={plansByType(type)} isLoading={isLoading} />
               </div>
             </TabsContent>
           ))}

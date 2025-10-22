@@ -1,9 +1,7 @@
-import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Policy } from '@/lib/types';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Car, FileText, HeartPulse, Home } from 'lucide-react';
 
 const ICONS: Record<string, React.ReactNode> = {
@@ -14,7 +12,6 @@ const ICONS: Record<string, React.ReactNode> = {
 }
 
 export function PolicyCard({ policy }: { policy: Policy }) {
-  const image = PlaceHolderImages.find(p => p.id === `${policy.plan.type}-insurance`);
 
   const getStatusVariant = (status: Policy['status']): 'default' | 'secondary' | 'destructive' => {
     switch (status) {

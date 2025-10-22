@@ -1,17 +1,31 @@
-import { userPolicies } from '@/lib/data';
+'use client';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bell, CalendarClock } from 'lucide-react';
 import { Button } from '../ui/button';
+import { useCollection, useFirebase, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import type { Policy } from '@/lib/types';
+import { Skeleton } from '../ui/skeleton';
 
 export function UpcomingRenewals() {
+  const { firestore, user } = useFirebase();
+
   const now = new Date();
   const thirtyDaysFromNow = new Date();
   thirtyDaysFromNow.setDate(now.getDate() + 30);
 
-  const upcomingRenewals = userPolicies.filter(policy => {
-    const endDate = new Date(policy.endDate);
-    return policy.status === 'Active' && endDate > now && endDate <= thirtyDaysFromNow;
-  });
+  const renewalsQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(
+      collection(firestore, 'users', user.uid, 'policies'),
+      where('status', '==', 'Active'),
+      where('endDate', '<=', thirtyDaysFromNow.toISOString()),
+      where('endDate', '>', now.toISOString())
+    );
+  }, [firestore, user, now.toISOString(), thirtyDaysFromNow.toISOString()]);
+
+  const { data: upcomingRenewals, isLoading } = useCollection<Policy>(renewalsQuery);
 
   return (
     <Card>
@@ -23,7 +37,12 @@ export function UpcomingRenewals() {
         <CardDescription>Policies expiring in the next 30 days.</CardDescription>
       </CardHeader>
       <CardContent>
-        {upcomingRenewals.length > 0 ? (
+        {isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : upcomingRenewals && upcomingRenewals.length > 0 ? (
           <ul className="space-y-4">
             {upcomingRenewals.map(policy => {
               const diffTime = Math.abs(new Date(policy.endDate).getTime() - now.getTime());

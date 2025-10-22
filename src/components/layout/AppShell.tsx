@@ -24,7 +24,7 @@ import {
   LogOut,
   Car,
 } from 'lucide-react';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useFirebase } from '@/firebase';
 
 function Logo() {
   return (
@@ -39,13 +39,23 @@ function Logo() {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const userAvatar = PlaceHolderImages.find(p => p.id === 'user-avatar')?.imageUrl || '';
+  const { auth, user } = useFirebase();
 
   const navItems = [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/find-policy', icon: ShieldCheck, label: 'Find a Policy' },
     { href: '/claims', icon: FileText, label: 'Claims' },
   ];
+
+  const handleLogout = () => {
+    if (auth) {
+      auth.signOut();
+    }
+  };
+  
+  const userAvatar = user?.photoURL;
+  const userInitial = user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'U';
+
 
   return (
     <SidebarProvider>
@@ -81,12 +91,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Link href="#" passHref>
-                <SidebarMenuButton tooltip="Log Out">
-                  <LogOut />
-                  <span>Log Out</span>
-                </SidebarMenuButton>
-              </Link>
+              <SidebarMenuButton tooltip="Log Out" onClick={handleLogout}>
+                <LogOut />
+                <span>Log Out</span>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
@@ -100,8 +108,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
              </h1>
           </div>
           <Avatar>
-            <AvatarImage src={userAvatar} alt="User" />
-            <AvatarFallback>UA</AvatarFallback>
+            {userAvatar && <AvatarImage src={userAvatar} alt="User" />}
+            <AvatarFallback>{userInitial.toUpperCase()}</AvatarFallback>
           </Avatar>
         </header>
         <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">
